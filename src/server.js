@@ -1,11 +1,17 @@
 
-const express = require("express");
+import express from "express";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
 const app = express();
 
-const PORT = 3000;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const PORT = process.env.PORT || 3000;
 const TANK_HEIGHT = 2000;
 
-app.use(express.static("public"));
+app.use(express.static(path.join(__dirname, "public")));
 
 let readings = [];
 
@@ -39,6 +45,6 @@ app.get("/api/history", (req, res) => {
     res.json(readings);
 });
 
-app.listen(PORT, () => {
-    console.log(`A121 Monitor running at http://localhost:${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+    console.log(`A121 Monitor running on port ${PORT}`);
 });
