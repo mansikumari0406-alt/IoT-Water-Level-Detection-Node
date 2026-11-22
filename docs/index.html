@@ -100,7 +100,7 @@
         });
 
         async function updateDashboard() {
-            const response = await fetch("/api/reading");
+            const response = await fetch("https://iot-water-level-detection-node.onrender.com/api/reading");
             const data = await response.json();
 
             document.getElementById("level").textContent =
