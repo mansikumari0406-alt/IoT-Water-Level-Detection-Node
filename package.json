@@ -1,0 +1,26 @@
+{
+  "name": "iot-water-level-detection",
+  "version": "1.0.0",
+  "description": "IoT water level detection training project (Node.js): BLE read, byte decoding, location, MQTT publish",
+  "type": "module",
+  "main": "src/main.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "simulate": "node src/main.js --simulate",
+    "scan": "node src/main.js --scan-ble",
+    "subscribe": "node src/mqttSubscribe.js",
+    "test": "node --test"
+  },
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "@elastic/elasticsearch": "^9.5.1",
+    "@stoprocent/noble": "^2.8.0",
+    "dotenv": "^18.0.10",
+    "express": "^5.3.0",
+    "mqtt": "^5.16.1",
+    "serialport": "^13.0.0"
+  }
+}

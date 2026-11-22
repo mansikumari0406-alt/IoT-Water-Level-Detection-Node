@@ -1,0 +1,171 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>A121 Water Monitoring</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 30px;
+            font-family: Arial;
+            background: #101827;
+            color: white;
+        }
+
+        h1 { color: #38bdf8; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: #1e293b;
+            padding: 25px;
+            border-radius: 12px;
+        }
+
+        .value {
+            font-size: 32px;
+            color: #4ade80;
+        }
+
+        canvas { background: #1e293b; }
+    </style>
+</head>
+
+<body>
+    <h1>A121 Water Level Monitoring</h1>
+    <div class="card">
+    <h3>BLE Device Discovery</h3>
+
+    <button id="scanBtn">Scan for WLD Device</button>
+
+    <p id="bleStatus">Waiting to scan...</p>
+    <pre id="bleDetails"></pre>
+</div>
+    <p>Sensor: A121 Simulator | Mode: Simulation</p>
+
+    <div class="grid">
+        <div class="card">
+            <h3>Water Level</h3>
+            <div class="value" id="level">--</div>
+        </div>
+
+        <div class="card">
+            <h3>Distance</h3>
+            <div class="value" id="distance">--</div>
+        </div>
+
+        <div class="card">
+            <h3>Tank Percentage</h3>
+            <div class="value" id="percentage">--</div>
+        </div>
+
+        <div class="card">
+            <h3>Sensor Status</h3>
+            <div class="value" id="status">Starting...</div>
+        </div>
+    </div>
+
+    <br>
+
+    <div class="card">
+        <h3>Live Water Level Graph</h3>
+        <canvas id="chart"></canvas>
+    </div>
+
+    <script>
+        const ctx = document.getElementById("chart");
+
+        const chart = new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: [],
+                datasets: [{
+                    label: "Water Level (mm)",
+                    data: [],
+                    borderColor: "#38bdf8",
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        async function updateDashboard() {
+            const response = await fetch("/api/reading");
+            const data = await response.json();
+
+            document.getElementById("level").textContent =
+                data.water_level_mm + " mm";
+
+            document.getElementById("distance").textContent =
+                data.distance_mm + " mm";
+
+            document.getElementById("percentage").textContent =
+                data.percentage + "%";
+
+            document.getElementById("status").textContent =
+                "Simulation";
+
+            chart.data.labels.push(data.timestamp);
+            chart.data.datasets[0].data.push(data.water_level_mm);
+
+            if (chart.data.labels.length > 15) {
+                chart.data.labels.shift();
+                chart.data.datasets[0].data.shift();
+            }
+
+            chart.update();
+        }
+
+        updateDashboard();
+        setInterval(updateDashboard, 2000);
+        
+const serviceUUID =
+    "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
+
+document.getElementById("scanBtn").addEventListener("click", async () => {
+    const status = document.getElementById("bleStatus");
+    const details = document.getElementById("bleDetails");
+
+    try {
+        if (!navigator.bluetooth) {
+            throw new Error("Web Bluetooth is not supported. Use Chrome.");
+        }
+
+        status.textContent = "Searching for BLE devices...";
+        details.textContent = "";
+
+        const device = await navigator.bluetooth.requestDevice({
+            filters: [{ namePrefix: "WLD" }],
+            optionalServices: [serviceUUID]
+        });
+
+        window.wldDevice = device;
+
+        status.textContent = "Device discovered successfully!";
+
+        details.textContent =
+            "Device Name: " + (device.name || "Unknown") +
+            "\nDevice ID: " + device.id +
+            "\nDiscovery: SUCCESS";
+
+        console.log("Discovered device:", device);
+
+    } catch (error) {
+        status.textContent = "Discovery failed: " + error.message;
+        console.error(error);
+    }
+});
+
+    </script>
+</body>
+</html>
